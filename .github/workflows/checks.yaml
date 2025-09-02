@@ -1,0 +1,49 @@
+name: Enforce Branch Naming Patterns
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+jobs:
+  check-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch naming conventions
+        run: |
+          # Get the source and target branch names
+          SOURCE_BRANCH="${{ github.head_ref }}"
+          TARGET_BRANCH="${{ github.base_ref }}"
+
+          echo "Source Branch: $SOURCE_BRANCH"
+          echo "Target Branch: $TARGET_BRANCH"
+
+          # Use regex to check the patterns
+          if [[ "$TARGET_BRANCH" == "main" ]]; then 
+            if [[ "$SOURCE_BRANCH" =~ ^release/.* ]] || [[ "$SOURCE_BRANCH" =~ ^hotfix/.* ]]; then
+              echo "Source branch is compatible to target branch. Check passed."
+            else
+              echo "::error::For target branches matching 'main', the source branch must match 'release/*' or 'hotfix/*'."
+              exit 1
+            fi
+          fi
+
+          if [[ "$TARGET_BRANCH" =~ ^release/.* ]]; then 
+            if [[ "$SOURCE_BRANCH" =~ ^feature/.* ]] || [[ "$SOURCE_BRANCH" =~ ^hotfix/.* ]]; then
+              echo "Source branch is compatible to target branch. Check passed."
+            else
+              echo "::error::For target branches matching 'release/*', the source branch must match 'feature/*' or 'hotfix/*'."
+              exit 1
+            fi
+          fi
+
+          if [[ "$TARGET_BRANCH" == "uat" ]]; then 
+            if [[ "$SOURCE_BRANCH" =~ ^release/.* ]]; then
+              echo "Source branch is compatible to target branch. Check passed."
+            else
+              echo "::error::For target branches matching 'uat', the source branch must match 'release/*'."
+              exit 1
+            fi
+          fi
+
+          echo "If you are reading this then your PR source and target branch are compatible"
+
