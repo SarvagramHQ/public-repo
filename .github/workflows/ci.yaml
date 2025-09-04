@@ -1,0 +1,12 @@
+name: myworkflow
+on: push
+jobs:
+  first_job:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Welcome message
+      run: echo "My first GitHub Actions Job"
+    - name: List files
+      run: ls
+    - name: current dir
+      run: pwd
